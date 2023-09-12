@@ -1,0 +1,189 @@
+\documentclass[a4paper,12pt,oneside, tikz]{book}  
+\usepackage[utf8]{inputenc}
+\usepackage{tcolorbox}
+\usepackage{amsmath,amssymb,amsthm, enumitem, hyperref, tabto} 
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{wrapfig}
+\usepackage{lastpage}
+\usepackage{tikz}
+\usetikzlibrary{external}
+\tikzexternalize % activate!
+\usepackage[american]{circuitikz}
+\usepackage[absolute,overlay]{textpos}
+\usepackage[left=2cm,right=2cm]{geometry}
+\usepackage[english]{babel}
+\usepackage{fancyhdr}
+\usepackage{float}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Studio 4},
+    pdfpagemode=FullScreen,
+    }
+
+\input{arduinoLanguage.tex}
+
+\urlstyle{same}
+\usepackage{xcolor}
+\usepackage{colortbl}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\colorlet{mygray}{black!30}
+\colorlet{mygreen}{green!60!blue}
+\colorlet{mymauve}{red!60!blue}
+\newcommand\inostyle{\lstset{
+  backgroundcolor=\color{gray!10},  
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  breakatwhitespace=false,      
+  breaklines=true,                
+  captionpos=b,                    
+  commentstyle=\color{mygreen}, 
+  extendedchars=true,              
+  frame=single,                   
+  keepspaces=true,
+  keywordstyle=\color{blue},      
+  language=Arduino,                 
+  numbers=none,                
+  numbersep=5pt,                   
+  numberstyle=\tiny\color{blue}, 
+  rulecolor=\color{mygray},        
+  showspaces=false,               
+  showtabs=false,                 
+  stepnumber=5,                  
+  stringstyle=\color{mymauve},    
+  tabsize=3,                      
+  title=\lstname                
+}}
+
+% INO environment
+\lstnewenvironment{ino}[1][]
+{
+\inostyle
+\lstset{#1}
+}
+{}
+
+
+% Ino for external files
+\newcommand\inoexternal[2][]{{
+\inostyle
+\lstinputlisting[#1]{#2}}}
+
+% Ino for inline
+\newcommand\inoinline[1]{{\inostyle\lstinline!#1!}}
+
+\usepackage{minted}
+
+\usepackage{graphicx, multicol, latexsym}
+\usepackage{blindtext}
+\usepackage{subfigure}
+\usepackage{caption}
+\usepackage{capt-of}
+\usepackage{tabu}
+\usepackage{booktabs}
+
+\usepackage{fancyhdr}            % Permits header customization. See header section below.
+\fancypagestyle{plain}{
+    \lhead{}
+    \fancyhead[R]{\thepage}
+    \fancyhead[L]{}
+    \renewcommand{\headrulewidth}{0pt}
+    \fancyfoot{}
+}
+
+\pagestyle{fancy}
+\fancyhead[R]{\thepage}
+\fancyhead[L]{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot{}
+
+\usepackage{array}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+
+\usepackage{titlesec}
+
+\titleformat{\chapter}[display]{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+% this alters "before" spacing (the second length argument) to 0
+\titlespacing*{\chapter}{0pt}{0pt}{40pt}
+
+
+\addto\captionsenglish{\renewcommand{\chaptername}{Activity}} 
+
+
+\title{\Huge\textbf{Jump Starting ALEX} \\ \Large{CG2111A Studio Report}}
+
+\author{
+Kuek Yeau Hao Jonathan (A0258485M), \\
+Leong Zhe Ming (A0252060W), \\
+Tran Duc Khang (A0242247J), \\ 
+Prannaya Gupta (A0242267E)
+}
+
+\begin{document}
+
+\maketitle
+
+\newpage
+
+\textbf{Q1. Examine the code in \texttt{w8s2p3.ino} in the Arduino IDE. What do you think you are seeing in the output?} (2 MARKS)
+
+\begin{tcolorbox}
+\textbf{Solution:}\\
+\texttt{\textbf{58}    char theSize = (char) sizeof(TData); \\
+\textbf{59}    Serial.write(theSize); \\
+\textbf{60}    Serial.write((char *) &test, sizeof(TData));} \\
+
+\\
+
+The code is trying to print the size of TData, but due to it being converted to a character, this is replaced with 'End of Transmission' (ASCII Character 4). After this, it is printing \texttt{x} and \texttt{y}, but they aren't rendered as ASCII Character 5 is 'Enquiry' and ASCII Character 10 is 'Line Feed', or rather newline.
+\end{tcolorbox}
+
+\textbf{Q2. Examine the values of \texttt{x} and \texttt{y} in \texttt{w8s2p3.ino}. Are the values the Pi is receiving correct?} (1 MARK)
+
+\begin{tcolorbox}
+The Pi received around \texttt{655365} for \texttt{x} and \texttt{-1092980228} for \texttt{y}, which are clearly incorrect.
+\end{tcolorbox}
+
+\textbf{Q3. Is \texttt{x} and \texttt{y} printing correctly now? What do you think caused \texttt{w8s2p3-pi} to print the incorrect answers in Question 1 above?} (3 MARKS)
+
+\begin{tcolorbox}
+Yes, it is printing correctly now. \\
+
+The initial code for \texttt{w8s2p3-pi} reads both integers as double the bits, hence \texttt{x} received follows the following formula (following Little Endian):
+
+$$x' = y \times 2^{16} + x = 655365$$
+
+On the other hand, \texttt{y} gives a random value as it is undefined.
+\end{tcolorbox}
+
+
+\textbf{Q4. Take note of the size of \texttt{TData} on the Pi and on the Arduino. Is there a difference in size? Is this difference affecting the answers for \texttt{x} and \texttt{y}?} (3 MARKS)
+
+\begin{tcolorbox}
+The size of \texttt{TData} on the Pi is 6 bytes, while the size of \texttt{TData} on the Arduino is 5 bytes. Yes, this is affecting it as \texttt{y} and \texttt{x} are joined when reading from the Pi.
+\end{tcolorbox}
+
+\textbf{Q5. Are the \texttt{x}, \texttt{y} and \texttt{c} fields being printed correctly now? What does this tell you about how the \texttt{gcc} compiler on the Pi compile \texttt{TData} versus the compiler on the Arduino?} (3 MARKS)
+
+\begin{tcolorbox}
+Yes, it is now printed correctly. \\
+
+This tells us that the \texttt{gcc} compiler pads the structure to keep every structure member of the same size, but the Arduino does no such thing.
+
+
+
+\end{tcolorbox}
+
+\begin{ino}
+
+Studio Marks: ___________ / 12
+\end{ino}
+
+\end{document}
